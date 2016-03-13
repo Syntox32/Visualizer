@@ -3,5 +3,6 @@
 class IAudioSource
 {
 public:
-	virtual unsigned char getSample(size_t width) = 0;
+	virtual void getSample(unsigned char* buffer) = 0;
+	virtual const char* getDevice() const = 0;
 };

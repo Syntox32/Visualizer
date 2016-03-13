@@ -7,7 +7,7 @@
 #include "alc.h"
 #include <stdio.h>
 
-class OpenALSource : IAudioSource
+class OpenALSource : public IAudioSource
 {
 public:
 	OpenALSource(int bufferSize, unsigned int freq);
@@ -18,7 +18,7 @@ public:
 	void start();
 	void stop();
 
-	const ALCchar defaultDevice() const { return *pDeviceDefault; }
+	const char* getDevice() const;
 
 private:
 	ALCint dataLen;

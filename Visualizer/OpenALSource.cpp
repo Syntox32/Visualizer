@@ -52,6 +52,11 @@ void OpenALSource::stop()
 	}
 }
 
+const char* OpenALSource::getDevice() const
+{
+	return (const char*)*pDeviceDefault;
+}
+
 void OpenALSource::getSample(unsigned char* buffer)
 {
 	// Get the samples
