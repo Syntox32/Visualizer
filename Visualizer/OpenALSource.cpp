@@ -54,7 +54,7 @@ void OpenALSource::stop()
 
 const char* OpenALSource::getDevice() const
 {
-	return (const char*)*pDeviceDefault;
+	return (const char*)pDeviceDefault;
 }
 
 void OpenALSource::getSample(unsigned char* buffer)
@@ -68,7 +68,7 @@ void OpenALSource::getSample(unsigned char* buffer)
 
 	if ((err = alGetError()) != AL_NO_ERROR)
 	{
-		printf("Error code: %d", err);
+		printf("Error code: %d\n", err);
 	}
 
 	// if we don't have enough samples yet,
@@ -83,7 +83,7 @@ void OpenALSource::getSample(unsigned char* buffer)
 
 		if ((err = alGetError()) != AL_NO_ERROR)
 		{
-			printf("Error code: %d", err);
+			printf("Error code: %d\n", err);
 		}
 	}
 	else

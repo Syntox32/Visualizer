@@ -16,6 +16,7 @@ struct Freq
 	float max;
 };
 
+
 class Visualizer
 {
 public:
@@ -41,6 +42,7 @@ private:
 	const unsigned int freq;
 	const FFTSize size;
 	bool useSerial;
+	bool keepRunning;
 
 	long sleepTime;
 	int dbMin;
@@ -48,6 +50,6 @@ private:
 	int freqMin;
 	int freqMax;
 
-	void printInfo();
+	void printInfo() const;
 };
 
