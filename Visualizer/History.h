@@ -7,7 +7,9 @@ class History
 public:
 	History(size_t maxLen)
 		: maxLen(maxLen)
-	{ }
+	{ 
+		history = new std::list<float>();
+	}
 
 	~History()
 	{
