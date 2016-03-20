@@ -5,30 +5,37 @@ FFT::FFT(FFTSize size)
 	: size(size)
 {
 	// www.fftw.org/doc/One_002dDimensional-DFTs-of-Real-Data.html#One_002dDimensional-DFTs-of-Real-Data
-	// in = (fftwf_complex*)fftw_alloc_complex(sizeof(fftwf_complex) * fftSize);
-	inData = new float[size];
-	outData = (fftwf_complex*)fftw_alloc_complex(sizeof(fftwf_complex) * size);
-	plan = fftwf_plan_dft_r2c_1d(size, inData, outData, FFTW_ESTIMATE);
+	size_t fftSize = getFFTSize();
+
+	intermediate = new float[fftSize];
+	outData = (fftwf_complex*)fftw_alloc_complex(sizeof(fftwf_complex) * fftSize);
+	plan = fftwf_plan_dft_r2c_1d(fftSize, intermediate, outData, FFTW_ESTIMATE);
 }
 
 FFT::~FFT()
 {
 	fftwf_destroy_plan(plan);
 	fftwf_free(outData);
-	delete inData;
+	delete intermediate;
 }
 
-int FFT::feed(float in[], size_t sampleLen)
+void FFT::process(float *outDataBuffer, float* in, size_t inLen)
 {
-	for (unsigned int i = 0; i < sampleLen; i++) 
+	for (unsigned int k = 0; k < inLen; k++) 
 	{
-		inData[i] = in[i];
+		intermediate[k] = in[k];
 	}
-}
 
-int FFT::process()
-{
 	fftwf_execute(plan);
+
+	float mag = 0.0f;
+	unsigned int index = getMaxFftIndex();
+
+	for (unsigned int i = 0; i < index; i++)
+	{
+		mag = sqrtf((outData[i][0] * outData[i][0]) + (outData[i][1] * outData[i][1]));
+		outDataBuffer[i] = mag;
+	}
 }
 
 void FFT::winBlackman(float in[], size_t sampleLen)

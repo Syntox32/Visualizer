@@ -23,8 +23,7 @@ public:
 	FFT(FFTSize size);
 	~FFT();
 
-	int feed(float in[], size_t sampleLen);
-	int process();
+	void process(float* outDataBuffer, float* in, size_t inLen);
 
 	inline int getBufferSize() const { return size; }
 	// 2 8-bit samples -> 1 float
@@ -41,7 +40,7 @@ public:
 private:
 	fftwf_plan plan;
 	fftwf_complex* outData;
-	float* inData;
+	float* intermediate;
 
 	FFTSize size;
 };
