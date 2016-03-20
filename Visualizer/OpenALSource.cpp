@@ -1,9 +1,11 @@
 #include "OpenALSource.h"
 
 
-OpenALSource::OpenALSource(int bufferSize, unsigned int freq)
-	: dataLen(0), freq(freq), bufferSize(bufferSize)
+OpenALSource::OpenALSource(const int bufferSize, unsigned int freq)
+	: dataLen(0), freq(freq), bufferSize(bufferSize), started(false)
 {
+	intermediate = new unsigned char[bufferSize];
+
 	pDeviceDefault = alcGetString(
 		nullptr,
 		ALC_CAPTURE_DEVICE_SPECIFIER); // get default capture device
@@ -40,6 +42,8 @@ void OpenALSource::start()
 	{
 		printf("Error code: %d\n", err);
 	}
+	
+	started = true;
 }
 
 void OpenALSource::stop()
@@ -59,6 +63,9 @@ const char* OpenALSource::getDevice() const
 
 void OpenALSource::getSample(unsigned char* buffer)
 {
+	if (!started)
+		printf("Warning: Source not started.");
+
 	// Get the samples
 	alcGetIntegerv(
 		pCaptureDevice,
@@ -71,6 +78,7 @@ void OpenALSource::getSample(unsigned char* buffer)
 		printf("Error code: %d\n", err);
 	}
 
+
 	// if we don't have enough samples yet,
 	// we just wait another frame and just 
 	// proceed with the previous one
@@ -80,6 +88,8 @@ void OpenALSource::getSample(unsigned char* buffer)
 			pCaptureDevice,
 			(ALCvoid*)buffer,
 			bufferSize);
+
+		//printf("dataLen: %d\n", dataLen);
 
 		if ((err = alGetError()) != AL_NO_ERROR)
 		{
@@ -91,7 +101,7 @@ void OpenALSource::getSample(unsigned char* buffer)
 		// we don't override the previous data in the buffer
 		// and just use the previous values to to the next calculations
 
-		// printf("Warning: dataLen < captureBufferLen\n");
+		//printf("Warning: dataLen < captureBufferLen %d\n", dataLen);
 	}
 }
 

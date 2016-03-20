@@ -127,19 +127,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Biquad.h" />
+    <ClInclude Include="FFT.h" />
+    <ClInclude Include="History.h" />
+    <ClInclude Include="IAudioSource.h" />
+    <ClInclude Include="LinearColumnSpectrum.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="OpenALSource.h" />
     <ClInclude Include="SerialClass.h" />
+    <ClInclude Include="Utils.h" />
+    <ClInclude Include="Visualizer.h" />
+    <ClInclude Include="WinAPISource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Biquad.cpp" />
+    <ClCompile Include="FFT.cpp" />
+    <ClCompile Include="History.cpp" />
+    <ClCompile Include="LinearColumnSpectrum.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OpenALSource.cpp" />
     <ClCompile Include="SerialClass.cpp" />
+    <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="Visualizer.cpp" />
+    <ClCompile Include="WinAPISource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="doc.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Ino\arduino.ino" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

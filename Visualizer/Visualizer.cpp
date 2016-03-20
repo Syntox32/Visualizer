@@ -9,20 +9,13 @@ Visualizer::Visualizer(const FFTSize size)
 	// use std::unique_ptr here?
 	source = new OpenALSource(size, freq);
 	serial = new Serial((char*)portName);
-	display = new SpectrumDisplay();
 	fft = new FFT(size);
-
-	int numBands = 30;
 	
-	sleepTime = 40; // ms
+	sleepTime = 40L; // ms
 	dbMin = 0;
 	dbMax = -90;
 	freqMin = 20;
-	freqMax = 400;
-
-	float *fftBuffer = new float[size];
-	float *magnitudes = new float[size];
-	unsigned char buffer[44100 * 2];
+	freqMax = 4000;
 
 	if (!serial->IsConnected()) {
 		printf("Serial disabled: could not connect to serial port.\n");
@@ -35,18 +28,46 @@ Visualizer::Visualizer(const FFTSize size)
 	printInfo();
 }
 
-
 Visualizer::~Visualizer()
-{
+{ }
 
+float Visualizer::getDbLevel(float in[], size_t len)
+{
+	float lvl = 0.0f;
+	for (unsigned int i = 0; i < len; i++)
+		lvl += 20.0f * log10(in[i]);
+
+	lvl /= (float)len;
+
+	// clamp db level to range 0 to 90
+	return max(min(lvl, dbMin), dbMax) - dbMax;
 }
+
+void Visualizer::scaleFft(float in[], size_t inLen)
+{
+	// perform scaling, either logarithmically or exponentially
+	for (unsigned int i = 0; i < inLen; i++)
+	{
+		//in[i] *= 20;
+		//in[i] = 20.0f * log10(in[i]);
+		in[i] = sqrt(in[i]) * 2;
+		//in[i] = sqrtf(in[i]);
+		//in[i] = 10.0f * log10(in[i]);
+	}
+}
+
+void applyFilter(float *inData, size_t inLen)
+{ }
 
 void Visualizer::init()
 {
+	LinearColumnSpectrum spectrum;
 
+	spectrum.init(this);
+	spectrum.start();
 }
 
-void Visualizer::printInfo()
+void Visualizer::printInfo() const
 {
 	printf("Using default recording device:\n\t%s\n\n", source->getDevice());
 	printf("Sleep time: %d ms\n", sleepTime);

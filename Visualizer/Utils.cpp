@@ -29,6 +29,9 @@ bool Utils::isSilence(History *his, int minDb)
 {
 	bool ret = true;
 
+	//if (his->getHistory()->size() == 0)
+	//	return ret;
+
 	for (auto& val : *his->getHistory())
 	{
 		if ((int)round(val) > minDb)

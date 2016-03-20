@@ -1,14 +1,14 @@
 #pragma once
 
 #include "FFT.h"
-#include "Utils.h"
 #include "SerialClass.h"
 #include "IAudioSource.h"
 #include "OpenALSource.h"
 #include "WinAPISource.h"
-#include "SpectrumDisplay.h"
+#include "LinearColumnSpectrum.h"
 
 #include <vector>
+#include <memory>
 
 struct Freq
 {
@@ -19,37 +19,37 @@ struct Freq
 
 class Visualizer
 {
+
 public:
 	Visualizer(FFTSize size);
 	~Visualizer();
 
 	void init();
 
-	inline unsigned int bufferSize() const { return (unsigned int)size; }
-	inline unsigned int fftSize() const { return (unsigned int)(size / 2); }
+	inline unsigned int getBufferSize() const { return (unsigned int)size; }
+	inline unsigned int getFFTSize() const { return (unsigned int)(size / 2); }
 
 	std::vector<Freq> genLinFreqLimits(int n, int min, int max);
 	std::vector<Freq> genLogFreqLimits(int n, size_t sampleRate);
 	std::vector<Freq> genExpFreqLimits(int n, int min, int max, size_t sampleRate);
 
-private:
-	SpectrumDisplay* display = nullptr;
-	IAudioSource* source = nullptr;
-	Serial* serial = nullptr;
-	FFT* fft = nullptr;
+	void printInfo() const;
+	float getDbLevel(float in[], size_t len); //, int minDb, int maxDb);
+	void scaleFft(float in[], size_t inLen);
 
-	const char* portName;
-	const unsigned int freq;
-	const FFTSize size;
-	bool useSerial;
-	bool keepRunning;
-
+	IAudioSource* source;
+	Serial* serial;
+	FFT* fft;
 	long sleepTime;
+	bool useSerial;
+	const FFTSize size;
+	
+	const unsigned int freq;
+	const char* portName;
+
 	int dbMin;
 	int dbMax;
 	int freqMin;
 	int freqMax;
-
-	void printInfo() const;
 };
 

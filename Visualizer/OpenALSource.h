@@ -10,7 +10,7 @@
 class OpenALSource : public IAudioSource
 {
 public:
-	OpenALSource(int bufferSize, unsigned int freq);
+	OpenALSource(const int bufferSize, unsigned int freq);
 	~OpenALSource();
 
 	void getSample(unsigned char* buffer);
@@ -24,9 +24,12 @@ private:
 	ALCint dataLen;
 	ALCenum err;
 	ALCuint freq;
-	ALCsizei bufferSize;
+	const ALCsizei bufferSize;
+	unsigned char* intermediate;
 
 	const ALCchar *pDeviceDefault;
 	ALCdevice *pCaptureDevice;
+	
+	bool started;
 };
 

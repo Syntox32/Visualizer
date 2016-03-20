@@ -18,11 +18,11 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
-struct Freq
-{
-	float min;
-	float max;
-};
+//struct Freq
+//{
+//	float min;
+//	float max;
+//};
 // typedef std::vector<freq> FreqBand;
 
 void check_al_error()
@@ -323,6 +323,17 @@ TODO:
 
 int main()
 {
+	//Visualizer* vz = new Visualizer(FFTSize::FFT2048);
+	//vz->init();
+
+	Visualizer vz(FFTSize::FFT2048);
+	vz.init();
+
+	return 0;
+}
+
+int main2()
+{
 	const unsigned int bufferSize = 2048; // 2048; //2048;
 	// 2 8-bit samples -> 1 float
 	// which means the length is half the size
@@ -461,7 +472,7 @@ int main()
 
 	std::list<float> eBandHistory[numBands];
 	std::list<float> eDiffHistory[numBands];
-	size_t maxHistorySamples = buffersPerSec; //42; //sleep; //43;
+	size_t maxHistorySamples = 1; //buffersPerSec; //42; //sleep; //43;
 
 	//float lastAverage = 0.0f;
 	//float lastEnergy = 0.0f;
@@ -593,17 +604,19 @@ int main()
 		// Apply a window function
 		//
 		//hann_window(fftBuffer, fftSize);
-		//blackman_window(fftBuffer, fftSize);
-		hamming_window(fftBuffer, fftSize);
+		blackman_window(fftBuffer, fftSize);
+		//hamming_window(fftBuffer, fftSize);
 		//harris_window(fftBuffer, fftSize);
 
 		//
 		// Get the approx. dB level of the current signal
 		//
 		currDbLevel = 0;
+		float db = 0.0f;
 		for (unsigned int i = 0; i < fftSize; i++)
 		{
-			currDbLevel += 20.0f * log10(fftBuffer[i]);
+			db = 20.0f * log10(fftBuffer[i]);
+			currDbLevel += db;
 		}
 		currDbLevel /= fftSize;
 
@@ -696,7 +709,7 @@ int main()
 
 		for (unsigned int i = 0; i < numBands; i++) {
 			// calculate the average energy for the current band
-			Freq f = fExp[i];
+			Freq f = fLin[i];
 			avgBandEnergy = 0.0f;
 
 			int minFreqBandIndex = freq_to_index(freq, f.min, maxFftIndex - 1);
@@ -736,17 +749,17 @@ int main()
 			
 			// --------------------------------------------------------------
 
-			int height = (int)round((win_hi / 1) * norm(eHistoryAverage, 0, 50)); //norm(avgBandDb, min_db, max_db));
+			int height = (int)round((win_hi / 1) * norm(avgBandEnergy, 0, 50)); //norm(avgBandDb, min_db, max_db));
 			int step = (int)lerp(prevBandThing[i], height, 0.7f);
 			prevBandThing[i] = step;
 
 			// clamp to window heigth
-			height = max(min(step, win_hi), 1);
+			height = max(min(height, win_hi), 1);
 
 			// simple smoothing using last rect as reference
-			float old = height;
-			height = (height + prev) / (i == 0 ? 1 : 2);
-			prev = old;
+			//float old = height;
+			//height = (height + prev) / (i == 0 ? 1 : 2);
+			//prev = old;
 
 			// set the rectangle position and size
 			vecPos.x = i * rectWidth + (2 * i);

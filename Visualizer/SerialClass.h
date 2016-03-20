@@ -40,5 +40,4 @@ public:
 	//Check if we are actually connected
 	bool IsConnected();
 
-
 };
