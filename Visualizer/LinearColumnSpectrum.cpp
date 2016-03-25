@@ -54,7 +54,27 @@ void LinearColumnSpectrum::init(const Visualizer* vzInstance)
 	}
 
 	fLin = vz->genLinFreqLimits(numBands, vz->freqMin, vz->freqMax);
+	fLog = vz->genLogFreqLimits(numBands, vz->freq);
 	fExp = vz->genExpFreqLimits(numBands, vz->freqMin, vz->freqMax, vz->freq / 2);
+
+	lp = new Biquad();
+	bp = new Biquad();
+	pf = new Biquad();
+
+	float ff = 250.0f;
+	lp->setBiquad(bq_type_lowpass, (float)(ff / (float)(vz->freq)), 0.707, 0);
+	bp->setBiquad(bq_type_bandpass, (float)(ff / (float)(vz->freq)), 0.9, 0);
+	pf->setBiquad(bq_type_peak, (float)(ff / (float)(vz->freq)), 0.7071, 3);
+}
+
+void LinearColumnSpectrum::applyFilter(float *inData, size_t inLen)
+{ 
+	for (unsigned int i = 0; i < inLen; i++)
+	{
+		lp->process(inData[i]);
+		//bp->process(inData[i]);
+		pf->process(inData[i]);
+	}
 }
 
 void LinearColumnSpectrum::start()
@@ -98,7 +118,7 @@ void LinearColumnSpectrum::nextFrame()
 	vz->source->getSample(intermediate);
 	Utils::shortToFloat(readyOutBuffer, intermediate, bufferSize);
 
-	vz->fft->winBlackman(readyOutBuffer, fftSize);
+	vz->fft->winHamming(readyOutBuffer, fftSize);
 
 	dbLvl = vz->getDbLevel(readyOutBuffer, fftSize); //, dbMin, dbMax);
 	hisDbLevel->push(dbLvl);
@@ -106,8 +126,12 @@ void LinearColumnSpectrum::nextFrame()
 
 	//printf("silent: %d\t dbLvl: %f\n", (int)silent, dbLvl);
 
+	applyFilter(readyOutBuffer, fftSize);
+
 	vz->fft->process(fftDataBuffer, readyOutBuffer, fftSize);
 	vz->scaleFft(fftDataBuffer, maxFftIndex);
+
+	//applyFilter(fftDataBuffer, fftSize);
 
 	float avgBandEnergy = 0.0f;
 	float avgHistoryEnergy = 0.0f;
@@ -116,7 +140,7 @@ void LinearColumnSpectrum::nextFrame()
 	for (unsigned int i = 0; i < numBands; i++) 
 	{
 		// calculate the average energy for the current band
-		Freq f = fExp[i];
+		Freq f = fLin[i];
 
 		int minFreqBandIndex = Utils::freqToIndex(vz->freq, f.min, maxFftIndex - 1);
 		int maxFreqBandIndex = Utils::freqToIndex(vz->freq, f.max, maxFftIndex - 1);
@@ -135,8 +159,13 @@ void LinearColumnSpectrum::nextFrame()
 
 		// ---------------------------------
 
-		int height = (int)round(winHi * Utils::norm(avgBandEnergy, 0, 50));
-		int step = (int)Utils::lerp(prevBandEnergies[i], height, 0.3f);
+		int height = (int)round(winHi * Utils::norm(avgBandEnergy, 0, 100));
+		int step = 0;
+		float pe = prevBandEnergies[i];
+		if (pe < height)
+			step = (int)Utils::lerp(prevBandEnergies[i], height, 0.85f);
+		else
+			step = (int)Utils::lerp(prevBandEnergies[i], height, 0.5f);
 		prevBandEnergies[i] = step;
 
 		height = max(min(step, winHi), 1);

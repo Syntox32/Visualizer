@@ -4,6 +4,7 @@
 
 #include "Visualizer.h"
 #include "Utils.h"
+#include "Biquad.h"
 
 #include <SFML\Graphics.hpp>
 #include <SFML\Window.hpp>
@@ -26,6 +27,7 @@ public:
 
 private:
 	void nextFrame();
+	void applyFilter(float *inData, size_t inLen);
 
 	unsigned char *intermediate;
 	float *readyOutBuffer;
@@ -45,8 +47,12 @@ private:
 	bool silent;
 
 	std::vector<Freq> fExp;
-	// std::vector<Freq> fLog;
+	std::vector<Freq> fLog;
 	std::vector<Freq> fLin;
+
+	Biquad *lp; // lowpass
+	Biquad *bp; // bandpass
+	Biquad *pf; // peakfilter
 
 	sf::Vector2f currPos;
 	sf::Vector2f currSize;
