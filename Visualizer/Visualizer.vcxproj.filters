@@ -74,9 +74,6 @@
     <ClCompile Include="WinAPISource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="History.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LinearColumnSpectrum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

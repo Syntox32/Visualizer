@@ -141,7 +141,6 @@
   <ItemGroup>
     <ClCompile Include="Biquad.cpp" />
     <ClCompile Include="FFT.cpp" />
-    <ClCompile Include="History.cpp" />
     <ClCompile Include="LinearColumnSpectrum.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OpenALSource.cpp" />

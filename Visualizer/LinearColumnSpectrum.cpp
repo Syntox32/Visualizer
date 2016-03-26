@@ -123,15 +123,14 @@ void LinearColumnSpectrum::nextFrame()
 	dbLvl = vz->getDbLevel(readyOutBuffer, fftSize); //, dbMin, dbMax);
 	hisDbLevel->push(dbLvl);
 	silent = Utils::isSilence(hisDbLevel, vz->dbMin);
-
 	//printf("silent: %d\t dbLvl: %f\n", (int)silent, dbLvl);
 
-	applyFilter(readyOutBuffer, fftSize);
+	//applyFilter(readyOutBuffer, fftSize);
 
 	vz->fft->process(fftDataBuffer, readyOutBuffer, fftSize);
 	vz->scaleFft(fftDataBuffer, maxFftIndex);
 
-	//applyFilter(fftDataBuffer, fftSize);
+	applyFilter(fftDataBuffer, maxFftIndex);
 
 	float avgBandEnergy = 0.0f;
 	float avgHistoryEnergy = 0.0f;

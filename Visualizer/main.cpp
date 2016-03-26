@@ -323,10 +323,7 @@ TODO:
 
 int main()
 {
-	//Visualizer* vz = new Visualizer(FFTSize::FFT2048);
-	//vz->init();
-
-	Visualizer vz(FFTSize::FFT2048);
+	Visualizer vz(FFTSize::FFT1024);
 	vz.init();
 
 	return 0;
@@ -345,7 +342,7 @@ int main2()
 	int min_db = 0;
 	int max_db = -90;
 	int min_freq = 20;
-	int max_freq = 400;
+	int max_freq = 4000;
 
 	unsigned int maxFftIndex = (fftSize / 2) + 1;
 
@@ -512,14 +509,14 @@ int main2()
 
 	beatClocks[4].restart();
 
-	bq::Biquad *lp = new bq::Biquad();
-	bq::Biquad *bp = new bq::Biquad();
-	bq::Biquad *pf = new bq::Biquad();
+	Biquad *lp = new Biquad();
+	Biquad *bp = new Biquad();
+	Biquad *pf = new Biquad();
 
 	float ff = 250.0f;
-	lp->setBiquad(bq::bq_type_lowpass, (float)(ff / (float)(freq)), 0.707, 0);
-	bp->setBiquad(bq::bq_type_bandpass, (float)(ff / (float)(freq)), 0.9, 0);
-	pf->setBiquad(bq::bq_type_peak, (float)(ff / (float)(freq)), 0.7071, 3);
+	lp->setBiquad(bq_type_lowpass, (float)(ff / (float)(freq)), 0.707, 0);
+	bp->setBiquad(bq_type_bandpass, (float)(ff / (float)(freq)), 0.9, 0);
+	pf->setBiquad(bq_type_peak, (float)(ff / (float)(freq)), 0.7071, 3);
 
 	beatClock.restart();
 

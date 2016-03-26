@@ -11,11 +11,11 @@ Visualizer::Visualizer(const FFTSize size)
 	serial = new Serial((char*)portName);
 	fft = new FFT(size);
 	
-	sleepTime = 40L; // ms
+	sleepTime = 30L; // ms
 	dbMin = 0;
 	dbMax = -90;
 	freqMin = 20;
-	freqMax = 4000;
+	freqMax = 2000;
 
 	if (!serial->IsConnected()) {
 		printf("Serial disabled: could not connect to serial port.\n");
@@ -55,9 +55,6 @@ void Visualizer::scaleFft(float in[], size_t inLen)
 		//in[i] = 10.0f * log10(in[i]);
 	}
 }
-
-void applyFilter(float *inData, size_t inLen)
-{ }
 
 void Visualizer::init()
 {
