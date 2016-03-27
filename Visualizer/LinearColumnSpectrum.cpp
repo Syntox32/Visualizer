@@ -61,10 +61,26 @@ void LinearColumnSpectrum::init(const Visualizer* vzInstance)
 	bp = new Biquad();
 	pf = new Biquad();
 
-	float ff = 250.0f;
+	float ff = 400.0f;
 	lp->setBiquad(bq_type_lowpass, (float)(ff / (float)(vz->freq)), 0.707, 0);
 	bp->setBiquad(bq_type_bandpass, (float)(ff / (float)(vz->freq)), 0.9, 0);
 	pf->setBiquad(bq_type_peak, (float)(ff / (float)(vz->freq)), 0.7071, 3);
+
+	// beat detection initialization
+
+	maxBandEntries = 43;
+	beatCount = 0;
+	beatClock.restart();
+
+	hisEnergy = new History(maxBandEntries);
+	
+	// individual band histories
+	for (unsigned int b = 0; b < numBands; b++)
+	{
+		bandHistories.push_back(new History(maxBandEntries));
+	}
+
+	// random thing
 }
 
 void LinearColumnSpectrum::applyFilter(float *inData, size_t inLen)
@@ -73,7 +89,7 @@ void LinearColumnSpectrum::applyFilter(float *inData, size_t inLen)
 	{
 		lp->process(inData[i]);
 		//bp->process(inData[i]);
-		pf->process(inData[i]);
+		//pf->process(inData[i]);
 	}
 }
 
@@ -113,12 +129,22 @@ void LinearColumnSpectrum::start()
 	stop();
 }
 
+float calc_c(float variance) //, float f)
+{
+	// TODO: add comments so this is not just a bunch of magic numbers
+
+	return ((-1.0f) * 0.0025714f * variance) + 1.3142857f;
+	//return ((-1.0f) * 0.0000002f * variance) + 1.3142857f;
+	//return ((-1.0f) * 0.0025714f * variance) + 1.5142857f;
+	//return ((-1.0f) * 0.0025714f * variance) + 5.559142857f;
+}
+
 void LinearColumnSpectrum::nextFrame()
 {
 	vz->source->getSample(intermediate);
 	Utils::shortToFloat(readyOutBuffer, intermediate, bufferSize);
 
-	vz->fft->winHamming(readyOutBuffer, fftSize);
+	vz->fft->winBlackman(readyOutBuffer, fftSize);
 
 	dbLvl = vz->getDbLevel(readyOutBuffer, fftSize); //, dbMin, dbMax);
 	hisDbLevel->push(dbLvl);
@@ -128,14 +154,46 @@ void LinearColumnSpectrum::nextFrame()
 	//applyFilter(readyOutBuffer, fftSize);
 
 	vz->fft->process(fftDataBuffer, readyOutBuffer, fftSize);
-	vz->scaleFft(fftDataBuffer, maxFftIndex);
 
 	applyFilter(fftDataBuffer, maxFftIndex);
+
+	// do some beat detection woopwoop
+
+	// maybe change out maxFftIndex for fftSize?
+	float energy = 0.0f;
+	for (unsigned int k = 0; k < maxFftIndex; k++)
+		energy += fftDataBuffer[k];
+	//energy /= maxFftIndex;
+
+	float avgEnergy = hisEnergy->avg();
+	float varEnergy = hisEnergy->var(avgEnergy);
+	float C = calc_c(varEnergy);
+	hisEnergy->push(energy);
+
+	float shit = C * avgEnergy;
+	if (energy > shit) 
+	{
+		if (beatClock.getElapsedTime().asMilliseconds() > 150)
+		{
+			beatClock.restart();
+			beatCount++;
+			printf("BEAT %d\n", beatCount);
+			// random things
+			// usage: dist(md)
+			std::random_device rd;
+			std::mt19937 mt(rd());
+			std::uniform_int_distribution<int> dist(0, 128);
+			backgroundColor = sf::Color(dist(mt), dist(mt), dist(mt)); //getRandomColor(dist, mt);
+		}
+	}
 
 	float avgBandEnergy = 0.0f;
 	float avgHistoryEnergy = 0.0f;
 	float old;
-	
+
+	// do some drawing with the individual bands
+	vz->scaleFft(fftDataBuffer, maxFftIndex);
+
 	for (unsigned int i = 0; i < numBands; i++) 
 	{
 		// calculate the average energy for the current band
@@ -153,8 +211,8 @@ void LinearColumnSpectrum::nextFrame()
 		if (silent)
 			avgBandEnergy = 0;
 
-		avgHistoryEnergy = hisAverage->avg();
-		hisAverage->push(avgBandEnergy);
+		bandHistories[i]->push(avgBandEnergy);
+		float avgBandHistoryEnergy = bandHistories[i]->avg();
 
 		// ---------------------------------
 

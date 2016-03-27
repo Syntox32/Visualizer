@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <random>
 
 #include "Visualizer.h"
 #include "Utils.h"
@@ -44,6 +45,7 @@ private:
 	History* hisAverage;
 	size_t numBands;
 	size_t maxHistoryEntries;
+	size_t maxBandEntries;
 	bool silent;
 
 	std::vector<Freq> fExp;
@@ -53,6 +55,13 @@ private:
 	Biquad *lp; // lowpass
 	Biquad *bp; // bandpass
 	Biquad *pf; // peakfilter
+
+	std::vector<History*> bandHistories;
+
+	History *hisEnergy;
+	float averageEnergy;
+	unsigned int beatCount;
+	sf::Clock beatClock;
 
 	sf::Vector2f currPos;
 	sf::Vector2f currSize;
@@ -70,5 +79,7 @@ private:
 	sf::Clock deltaClock;
 	sf::Time frameDelta;
 	sf::RectangleShape dbMeter;
+
+
 };
 
